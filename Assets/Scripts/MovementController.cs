@@ -6,25 +6,30 @@ public class MovementController : MonoBehaviour {
     [SerializeField]
     float movementSpeed = 4.0f;
     [SerializeField]
-    float rotationSpeed = 4.0f;
+    byte rotationSmoothness = 15;
 
-    float velocity = .0f;
-    float rotation = .0f;
+    Vector3 velocity = Vector3.zero;
 
-    static Transform s_selfTransform;
+    Transform selfTransform;
 
     void Start() {
-        s_selfTransform = this.GetComponent<Transform>();
+        selfTransform = this.GetComponent<Transform>();
     }
 
     void Update() {
-        rotation = Input.GetAxis("Horizontal");
-        velocity = Input.GetAxis("Vertical");
+        velocity.x = Input.GetAxis("Horizontal");
+        velocity.z = Input.GetAxis("Vertical");
     }
 
-    /* roda sempre em 60 fps */
     void FixedUpdate() {
-        s_selfTransform.Translate(Vector3.forward * velocity * movementSpeed * Time.fixedDeltaTime, Space.Self);
-        s_selfTransform.Rotate(new Vector3(.0f, rotation * rotationSpeed, .0f), Space.Self);
+        if (velocity != Vector3.zero) {
+            selfTransform.Translate(
+                Vector3.forward * velocity.magnitude * movementSpeed * Time.fixedDeltaTime,
+                Space.Self
+            );
+
+            var direction = Quaternion.LookRotation(velocity);
+            selfTransform.rotation = Quaternion.Lerp(selfTransform.rotation, direction, Time.fixedDeltaTime * rotationSmoothness);
+        }
     }
 }
