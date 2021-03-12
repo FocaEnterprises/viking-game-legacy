@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class MovementController : MonoBehaviour {
     [SerializeField]
-    float movementSpeed = 4.0f;
+    float movementSpeed = 5.0f;
     [SerializeField]
-    byte rotationSmoothness = 15;
+    byte rotationSmoothness = 10;
 
     Vector3 velocity = Vector3.zero;
 
@@ -17,11 +17,13 @@ public class MovementController : MonoBehaviour {
     }
 
     void Update() {
-        velocity.x = Input.GetAxis("Horizontal");
-        velocity.z = Input.GetAxis("Vertical");
+        velocity.x = Input.GetAxisRaw("Horizontal");
+        velocity.z = Input.GetAxisRaw("Vertical");
     }
 
     void FixedUpdate() {
+        velocity = velocity.normalized;
+
         if (velocity != Vector3.zero) {
             selfTransform.Translate(
                 Vector3.forward * velocity.magnitude * movementSpeed * Time.fixedDeltaTime,
@@ -29,7 +31,11 @@ public class MovementController : MonoBehaviour {
             );
 
             var direction = Quaternion.LookRotation(velocity);
-            selfTransform.rotation = Quaternion.Lerp(selfTransform.rotation, direction, Time.fixedDeltaTime * rotationSmoothness);
+            selfTransform.rotation = Quaternion.Lerp(
+                selfTransform.rotation,
+                direction,
+                Time.fixedDeltaTime * rotationSmoothness
+            );
         }
     }
 }
